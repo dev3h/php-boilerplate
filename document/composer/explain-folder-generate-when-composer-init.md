@@ -1,0 +1,308 @@
+Sau khi chạy xong sẽ có các file được tạo ra như sau:
+- vendor
+- composer.json
+- composer.phar
+
+Nội dung của file `composer.json` sau khi chạy lệnh `composer init` sẽ như sau:
+```json
+{
+    "name": "dev3h/php-boilerplate",
+    "description": "vanila PHP boilerplate project",
+    "type": "project",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "App\\": "app/"
+        }
+    },
+    "authors": [
+        {
+            "name": "dev3h"
+        }
+    ],
+    "require": {}
+}
+```
+
+Trong folder vendor sẽ có 1 file `autoload.php` và 1 folder `composer`.
+
+Giai thích chi tiết từng phần
+```json
+"autoload": {
+  "psr-4": {
+    "App\\": "app/"
+  }
+}
+```
+| Thành phần   | Ý nghĩa                                                             |
+| ------------ | ------------------------------------------------------------------- |
+| `"autoload"` | Khai báo phần cấu hình autoload cho Composer                        |
+| `"psr-4"`    | Tiêu chuẩn **autoload PSR-4** (chuẩn hiện đại của PHP)              |
+| `"App\\"`    | Đây là **namespace gốc (prefix)**. Các class sẽ bắt đầu bằng `App\` |
+| `"app/"`     | Đây là thư mục chứa mã nguồn thật sự tương ứng với namespace `App\` |
+
+🔍 Ví dụ thực tế
+Giả sử bạn có file sau:
+
+```php
+app/Controllers/ProductController.php
+```
+
+Với nội dung:
+
+```php
+<?php
+
+namespace App\Controllers;
+
+class ProductController {
+    public function index() {
+        echo "Hello from ProductController";
+    }
+}
+```
+
+Bạn có thể gọi class này ở bất kỳ đâu sau khi chạy composer dump-autoload, như:
+
+```php
+use App\Controllers\ProductController;
+
+$controller = new ProductController();
+$controller->index();
+```
+
+➡️ Bạn KHÔNG cần require_once 'app/Controllers/ProductController.php' nữa. Composer sẽ tự động load class.
+
+✅ Cần làm gì sau khi thêm cấu hình "autoload"?
+Sau khi bạn thêm hoặc thay đổi "autoload" trong composer.json, hãy chạy:
+
+```bash
+composer dump-autoload
+```
+Lệnh này sẽ tạo hoặc cập nhật file vendor/autoload.php và ánh xạ class ↔ đường dẫn.
+
+| Ưu điểm khi dùng PSR-4 autoload     |
+| ----------------------------------- |
+| ✅ Không cần `require_once` thủ công |
+| ✅ Code sạch, tổ chức rõ ràng        |
+| ✅ Dễ mở rộng & bảo trì lâu dài      |
+
+# Giai thích các file và folder sau khi chạy lệnh `composer init`
+## 1 Folder vendor
+Thư mục chính do Composer tạo ra, nơi chứa:
+- tất cả các thư viện bạn đã cài đặt (VD: monolog/, vlucas/phpdotenv/, v.v.)
+- hệ thống autoload mà Composer tự động sinh ra
+
+## 2 File vendor/autoload.php
+Đây là file quan trọng nhất bạn sẽ sử dụng trong mã PHP để nạp tự động (autoload) tất cả các class được định nghĩa theo cấu hình của bạn (PSR-4, PSR-0, classmap, files...).
+
+📌 Bạn chỉ cần dùng:
+```php
+require_once __DIR__ . '/vendor/autoload.php';
+```
+
+Và các class trong namespace App\ (ví dụ) sẽ được tự động nạp.
+
+## 3 Folder vender/composer
+Thư mục này chứa các file hỗ trợ nội bộ để Composer thực hiện quá trình autoload. Dưới đây là chi tiết một số file:
+
+### File autoload_psr4.php
+- Là mảng ánh xạ giữa namespace và thư mục tương ứng theo chuẩn PSR-4.
+- VD:
+```php
+return array(
+    'App\\' => array($baseDir . '/app'),
+);
+```
+→ nghĩa là các class có namespace App\ sẽ tìm trong thư mục app/.
+
+### File autoload_classmap.php
+- Là mảng ánh xạ giữa tên đầy đủ của class và file chứa class đó, dùng để load nhanh hơn.
+- VD:
+```php
+return array(
+    'App\\Controller\\UserController' => $baseDir . '/app/Controller/UserController.php',
+);
+```
+→ Composer dùng khi bạn chạy lệnh composer dump-autoload -o (optimize)
+
+### File autoload_namespaces.php
+- Tương tự như autoload_psr4.php nhưng dành cho các namespace không tuân thủ PSR-4.
+- Dùng khi bạn cần ánh xạ các namespace cũ hoặc không chuẩn. (PSR-0)
+
+### File autoload_static.php
+- Nếu Composer bật chế độ tối ưu, nó sẽ sinh ra file này chứa mảng tĩnh để load class nhanh hơn (giảm chi phí IO).
+- Dùng trong môi trường production vì hiệu năng tốt hơn autoload động.
+
+### File autoload_files.php
+- Nếu bạn dùng tùy chọn autoload > files trong composer.json, các file PHP nằm trong danh sách này sẽ được require_once ngay lập tức (không cần class).
+- Ví dụ dùng để load helper functions.
+
+### File autoload_real.php
+- đóng vai trò là trung tâm khởi động hệ thống autoload cho toàn bộ dự án PHP của bạn.
+- Nó chịu trách nhiệm tạo ra instance autoloader và đăng ký nó với PHP.
+- Khi bạn gọi:
+```php
+require_once __DIR__ . '/vendor/autoload.php';
+```
+Thực tế dòng đó sẽ gọi đến autoload_real.php để:
+1. Tạo autoloader (sử dụng ComposerAutoloaderInitXXXXX)
+2. Đăng ký autoloader vào hệ thống SPL autoload của PHP
+3. Load tất cả các file cần thiết như:
+- autoload_psr4.php
+- autoload_classmap.php
+- autoload_files.php
+- autoload_namespaces.php
+```r
+vendor/autoload.php 
+   ⬇
+autoload_real.php 
+   ⬇
+Tạo ClassLoader ➜ Đăng ký Autoload ➜ Load các mapping PSR-4, classmap...
+```
+🤔 Vì sao Composer cần tạo autoload_real.php?
+- Composer cần một điểm tập trung để cấu hình và ghi nhớ logic riêng của từng project (mỗi project có thể có autoload khác nhau).
+- Tên class ComposerAutoloaderInitXXXXX được tạo dựa trên hash riêng biệt để tránh xung đột giữa các dự án.
+
+Không nên sửa file. Vì file này được Composer tự động sinh ra. Nếu bạn chỉnh tay → mọi thay đổi sẽ mất đi khi bạn chạy:
+
+autoload_real.php chính là "bộ não" đứng sau vendor/autoload.php, đảm nhận việc tạo, đăng ký và kết nối tất cả các thành phần autoload của Composer lại với nhau.
+### File ClassLoader.php
+- Đây là class autoloader cốt lõi của Composer. Nó thực hiện công việc tra cứu, ánh xạ và nạp các file tương ứng khi bạn gọi 1 class.
+- Về bản chất
+ 	- Nó kiểm tra namespace
+ 	- Ánh xạ đến thư mục đúng
+	- Sử dụng require để nạp class vào bộ nhớ
+
+## Psr-4, PSR-0 là gì?
+🔰 1. PSR là gì?
+
+PSR (PHP Standards Recommendation) là các tiêu chuẩn được định nghĩa bởi PHP-FIG (PHP Framework Interop Group) để giúp các project PHP có thể dùng chung cách tổ chức code, tên class, autoload...
+
+📦 2. PSR-0 và PSR-4 là gì?
+| Tiêu chuẩn | Mục đích chính                | Trạng thái                  | Thay thế      |
+| ---------- | ----------------------------- | --------------------------- | ------------- |
+| **PSR-0**  | Autoload class từ file path   | Deprecated (không dùng nữa) | Bởi **PSR-4** |
+| **PSR-4**  | Chuẩn hiện đại, linh hoạt hơn | Hiện đang dùng phổ biến     | —             |
+
+✅ PSR-4 (hiện đại)
+
+🌱 Cấu trúc namespace → đường dẫn thư mục
+
+PSR-4 định nghĩa cách ánh xạ namespace vào đường dẫn thư mục để PHP có thể tự động require đúng file.
+
+Ví dụ trong composer.json:
+
+```json
+{
+    "autoload": {
+        "psr-4": {
+            "App\\": "app/"
+        }
+    }
+}
+```
+🔍 Giải thích
+
+- "App\\" là prefix của namespace
+
+- "app/" là đường dẫn thư mục chứa class PHP
+
+Khi bạn khai báo:
+```php
+use App\Controllers\HomeController;
+```
+Composer sẽ hiểu rằng nó phải tìm file:
+```php
+app/Controllers/HomeController.php
+```
+
+⚠️ PSR-0 (cũ – không khuyên dùng)
+- PSR-0 cũng ánh xạ namespace → file path nhưng quy tắc phức tạp hơn.
+- Ví dụ class \Namespace\Sub\Class_Name sẽ map đến file:
+
+```php
+Namespace/Sub/Class_Name.php
+```
+- Và _ trong tên class cũng được chuyển thành /.
+- Vì sự rối rắm này, PSR-4 đã ra đời để thay thế.
+
+🧪 Tóm tắt PSR-4 hoạt động thế nào?
+1. Bạn dùng lệnh:
+```bash
+composer dump-autoload
+```
+2. Composer tạo file vendor/autoload.php và cấu hình PSR-4 mapping.
+3. Khi bạn gọi một class với namespace như App\Models\User, PHP sẽ tự load app/Models/User.php.
+
+### File composer.json
+
+File composer.json là trái tim của hệ thống quản lý gói (package manager) trong PHP – cụ thể là Composer. Nó giống như một "bản kê khai" giúp bạn:
+
+1. **Khai báo thông tin dự án**: Tên, mô tả, tác giả, giấy phép, v.v.
+2. **Quản lý các thư viện bên ngoài**: Bạn có thể chỉ định các thư viện cần thiết cho dự án, cùng với phiên bản tương ứng.
+3. **Cấu hình autoload**: Cho phép tự động nạp các class theo chuẩn PSR-4, PSR-0 hoặc classmap, giúp bạn không cần phải require từng file thủ công.
+4. **Định nghĩa các script**: Bạn có thể định nghĩa các lệnh tùy chỉnh để chạy trong quá trình phát triển, như kiểm tra mã nguồn, chạy test, v.v.
+
+```js
+"scripts": {
+  "post-install-cmd": ["echo Installed!"]
+}
+"scripts": {
+  "post-install-cmd": ["echo Installed!"]
+}
+```
+
+| Thành phần           | Mục đích                                       |
+| -------------------- | ---------------------------------------------- |
+| `require`            | Khai báo các thư viện cần thiết cho production |
+| `require-dev`        | Khai báo thư viện chỉ dùng cho development     |
+| `autoload`           | Khai báo cách tự động nạp class (PSR-4, PSR-0) |
+| `scripts`            | Chạy các câu lệnh tự động sau install/update   |
+| `config`, `extra`... | Các cấu hình mở rộng khác nếu cần              |
+
+### File composer.phar
+File composer.phar là file thực thi chính của Composer, một PHP Archive (PHAR) dùng để quản lý các thư viện PHP và dependency trong một dự án.
+
+📦 composer.phar là gì?
+- Là một file nén duy nhất dạng .phar, chứa toàn bộ mã nguồn Composer.
+- PHAR giống như một file .jar trong Java — nó là một file thực thi.
+- Có thể chạy trực tiếp bằng PHP mà không cần cài Composer toàn hệ thống.
+
+🛠️ Dùng composer.phar để làm gì?
+1. 🔧 Quản lý thư viện
+Cài đặt thư viện PHP:
+
+```bash
+php composer.phar install
+php composer.phar require monolog/monolog
+```
+2. 🔄 Cập nhật thư viện
+```bash
+php composer.phar update
+```
+3. ⚙️ Tạo autoload
+```bash
+php composer.phar dump-autoload
+```
+4. 🧪 Kiểm tra version
+```bash
+php composer.phar --version
+```
+🔄 Tại sao có thể dùng composer.phar thay vì composer?
+
+| `composer` (lệnh)                                    | `composer.phar` (file)                                |
+| ---------------------------------------------------- | ----------------------------------------------------- |
+| Dùng nếu Composer đã được cài toàn hệ thống (global) | Dùng nếu bạn muốn chạy Composer cục bộ, không cài đặt |
+| Ví dụ: `composer install`                            | Ví dụ: `php composer.phar install`                    |
+💡 Khi nào nên dùng composer.phar?
+
+| Tình huống                                         | Có nên dùng `composer.phar`?         |
+| -------------------------------------------------- | ------------------------------------ |
+| 💻 Trên máy chủ không có Composer global           | ✅ Có, vì chỉ cần PHP là chạy được    |
+| 🧪 Muốn dùng phiên bản Composer cụ thể trong dự án | ✅ Có, bạn có thể commit vào Git luôn |
+| 🧹 Không muốn can thiệp hệ thống                   | ✅ Rất thích hợp                      |
+| 🧩 Dự án cần portable (dễ mang đi, dễ setup)       | ✅                                    |
+
+
+
