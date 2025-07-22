@@ -5,8 +5,11 @@ php-boilerplate/
 │   ├── .htaccess             # Apache rewrite
 │   └── index.php
 ├── app/                    # Mã nguồn chính
+│   ├── Controllers/       # Chứa các controller
 │   ├── Core/               # Class chung (DB, Router, View, Request,...)
 │   │   └── Router.php
+│   │   └── View.php
+│   ├── Views/         # Thư mục chứa các view
 ├── routes/                 # Định nghĩa các route
 │   └── web.php
 ├── config/                 # Cấu hình DB, app

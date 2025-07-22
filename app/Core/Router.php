@@ -91,7 +91,7 @@ class Router
 
 		// Case 1: 'Controller@method' format
 		if (is_string($action)) {
-			[$controller, $method] = explode('@', $action);
+			[$controller, $methodName] = explode('@', $action);
 			$controllerClass = "\\App\\Controllers\\$controller";
 		}
 
@@ -109,7 +109,7 @@ class Router
 		}
 
 		$controllerInstance = new $controllerClass();
-
+		
 		if (!method_exists($controllerInstance, $methodName)) {
 			echo "Method $methodName not found in controller $controllerClass";
 			return;
