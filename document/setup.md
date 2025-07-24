@@ -3,13 +3,15 @@
 php-boilerplate/
 ├── public/                 # Nơi chứa index.php, entry point
 │   ├── .htaccess             # Apache rewrite
-│   └── index.php
+│   └── index.php         # Entry point của ứng dụng, chứa khởi tạo Route, các khởi tạo từ bootstrap/app.php
 ├── app/                    # Mã nguồn chính
 │   ├── Controllers/       # Chứa các controller
 │   ├── Core/               # Class chung (DB, Router, View, Request,...)
 │   │   └── Router.php
 │   │   └── View.php
 │   ├── Views/         # Thư mục chứa các view
+├── bootstrap/              # Thư mục khởi tạo ứng dụng
+│   └── app.php          # Nơi khởi tạo các thành phần cần thiết (env, autoload)
 ├── routes/                 # Định nghĩa các route
 │   └── web.php
 ├── config/                 # Cấu hình DB, app
@@ -28,12 +30,27 @@ composer dump-autoload
 ```
 
 # 3 Tạo file Router.php, web.php
-- **Router.php**: Class Router để xử lý các route.
+- **Core\Router.php**: Class Router để xử lý các route.
 - **web.php**: File định nghĩa các route của ứng dụng.
-# 4 Tạo file index.php trojg folder public
+
+# 4 Tạo file index.php trong folder public
+- File index.php sẽ là entry point của ứng dụng, nơi sẽ khởi tạo các thành phần cần thiết như Router, autoload, load env
 
 # 5 Tạo file .htaccess trong folder public
+- Mục đích của file này là để cấu hình Apache server, cho phép sử dụng URL thân thiện và chuyển hướng tất cả các yêu cầu đến index.php.
 
-# env
-dùng getenv() không được, phải dùng $_ENV['KEY'] để lấy giá trị từ file .env. 
-Tại sao? Vì getenv() chỉ lấy giá trị từ biến môi trường đã được thiết lập trong hệ thống, trong khi $_ENV là mảng chứa các biến môi trường đã được nạp từ file .env.
+# 6 Thiết lập view
+- Từ controller, get tất cả dữ liệu cần thiết, sau đó require đến màn hình view
+- Tuy nhiên, để tối ưu hơn, ta sẽ tạo một class View trong Core, để xử lý việc render view và truyền dữ liệu vào view.
+
+# 7 Config DB
+- Tạo 1 cái core Database để thực hiện kết nối đến DB, áp dụng design pattern singleton để chỉ có một instance duy nhất của Database.
+- Tạo file config/database.php để chứa các thông tin kết nối đến cơ sở dữ liệu.
+- Để đảm bảo tính bảo mật, tiến hành load các biến môi trường từ file .env, sử dụng package `vlucas/phpdotenv`.
+
+# 8 .env
+- Tự động load biến .env sử dụng `vlucas/phpdotenv` package.
+
+```bash
+composer require vlucas/phpdotenv
+```
