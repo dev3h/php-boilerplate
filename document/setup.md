@@ -6,9 +6,12 @@ php-boilerplate/
 │   └── index.php         # Entry point của ứng dụng, chứa khởi tạo Route, các khởi tạo từ bootstrap/app.php
 ├── app/                    # Mã nguồn chính
 │   ├── Controllers/       # Chứa các controller
+│   ├── Services/          # Chứa các service
+│   ├── Repositories/      # Chứa các repository
 │   ├── Core/               # Class chung (DB, Router, View, Request,...)
 │   │   └── Router.php
 │   │   └── View.php
+│   │   └── Database.php
 │   ├── Views/         # Thư mục chứa các view
 ├── bootstrap/              # Thư mục khởi tạo ứng dụng
 │   └── app.php          # Nơi khởi tạo các thành phần cần thiết (env, autoload)
