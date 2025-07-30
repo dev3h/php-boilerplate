@@ -119,4 +119,22 @@ class Router
 		// This allows routing to work even when the method name is determined at runtime.
 		call_user_func([$controllerInstance, $methodName]);
 	}
+
+	/**
+	 * Get the URI for a named route.
+	 *
+	 * @param string $name The name of the route.
+	 * @return string|null The URI if found, null otherwise.
+	 */
+	public function route(string $name): ?string
+	{
+		foreach ($this->routes as $methodRoutes) {
+			foreach ($methodRoutes as $uri => $details) {
+				if (($details['name'] ?? null) === $name) {
+					return $uri;
+				}
+			}
+		}
+		return null;
+	}
 }

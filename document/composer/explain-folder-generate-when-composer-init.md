@@ -176,6 +176,24 @@ public static function getInitializer(ClassLoader $loader)
 ### File autoload_files.php
 - Nếu bạn dùng tùy chọn autoload > files trong composer.json, các file PHP nằm trong danh sách này sẽ được require_once ngay lập tức (không cần class).
 - Ví dụ dùng để load helper functions.
+```php
+'hash_key' => 'absolute_path_to_php_file'
+```
+- Composer sẽ require từng file PHP này khi autoload được kích hoạt (vendor/autoload.php).
+- Thường dùng cho các file bootstrap hoặc helpers, tức là cần thiết lập trước môi trường hoặc cung cấp hàm toàn cục (global functions).
+```php
+return array(
+    // Symfony polyfills – bổ sung hàm cho các phiên bản PHP cũ
+    '32xxx' => $vendorDir . '/symfony/polyfill-ctype/bootstrap.php',
+    '0exxx' => $vendorDir . '/symfony/polyfill-mbstring/bootstrap.php',
+    'a4axxx' => $vendorDir . '/symfony/polyfill-php80/bootstrap.php',
+
+    // File helpers do bạn tự định nghĩa
+    'ed0xxx' => $baseDir . '/app/Helpers/helpers.php',
+);
+```
+- Mỗi khi bạn require 'vendor/autoload.php', thì Composer sẽ require_once tất cả các file trong danh sách trên
+- Tên key (hash) là một mã hash duy nhất để Composer theo dõi các file autoload.
 
 ### File autoload_real.php
 - đóng vai trò là trung tâm khởi động hệ thống autoload cho toàn bộ dự án PHP của bạn.

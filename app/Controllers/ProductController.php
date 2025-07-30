@@ -18,4 +18,9 @@ class ProductController
         $products = $this->productService->get_all();
         View::render('product/index', ['products' => $products]);
     }
+
+    public function create()
+    {
+        View::render('product/create');
+    }
 }

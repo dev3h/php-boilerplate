@@ -1,3 +1,4 @@
+<a href="<?php echo route('product.create') ?>">Create</a>
 <table>
     <thead>
         <tr>

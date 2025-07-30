@@ -57,3 +57,15 @@ composer dump-autoload
 ```bash
 composer require vlucas/phpdotenv
 ```
+
+# 9 Tạo fn route trong Core\Router.php để xử lý bên frontend
+- Trong frontend, mong muốn là sử dụng được route('route_name') để lấy ra URL của route đó.
+- Ta sẽ tạo 1 hàm route trong Core\Router.php để xử lý việc này. Sau đó tạo 1 file helpers trong folder Helpers để xử lý khi người dùng sử dụng bên fronend thì sẽ gọi hàm để lấy ra URL của route.
+- Để có thể dùng hàm của helpers, ta sẽ autoload file helpers này trong composer.json.
+```json
+"autoload": {
+    "files": [
+        "app/Helpers/helpers.php"
+    ]
+}
+```
