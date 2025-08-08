@@ -1,5 +1,7 @@
 <?php
 
+use App\Core\Validator;
+
 if (!function_exists('dd')) {
     /**
      * Dump and die function for debugging with pretty output.
@@ -31,3 +33,71 @@ if (!function_exists('route')) {
         return $router->route($name);
     }
 }
+
+if (!function_exists('validator')) {
+    /**
+     * Validate data against rules.
+     *
+     * @param array $data The data to validate.
+     * @param array $rules The validation rules.
+     */
+    function validator(array $data, array $rules): Validator
+    {
+        $validator = new Validator();
+        return $validator->validate($data, $rules);
+    }
+}
+
+if (!function_exists('flash')) {
+    /**
+     * Flash a message to the session.
+     *
+     * @param $key The key for the flash message.
+     * @param $value The value for the flash message.
+     */
+    function flash($key, $value = null)
+    {
+        if (!isset($_SESSION)) session_start();
+
+        if ($value === null) {
+            $flash = $_SESSION['_flash'][$key] ?? null;
+            unset($_SESSION['_flash'][$key]);
+            return $flash;
+        }
+
+        $_SESSION['_flash'][$key] = $value;
+    }
+}
+
+if (!function_exists('old')) {
+    /**
+     * Get old input value from session.
+     *
+     * @param string $key The key for the old input.
+     * @return mixed|null The old input value or null if not set.
+     */
+    function old(string $key, $default = '')
+    {
+        if (!isset($_SESSION)) session_start();
+
+        $old = $_SESSION['_old'][$key] ?? $default;
+
+        unset($_SESSION['_old'][$key]);
+
+        return htmlspecialchars($old, ENT_QUOTES, 'UTF-8');
+    }
+}
+
+if (!function_exists('set_old')) {
+    /**
+     * Set old input value in session.
+     *
+     * @param array $data The data to set as old input.
+     */
+    function set_old($data)
+    {
+        if (!isset($_SESSION)) session_start();
+        $_SESSION['_old'] = $data;
+    }
+}
+
