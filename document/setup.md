@@ -69,3 +69,9 @@ composer require vlucas/phpdotenv
     ]
 }
 ```
+
+# 10 Tạo Core\Validator.php để xử lý validate
+- Tạo class Validator trong Core để xử lý validate dữ liệu.
+- Tạo thêm 1 hàm `validate` trong file helpers để sử dụng dễ dàng hơn.
+- Trong quá trình trả về lỗi trong controller, ta cần handle validate lỗi sẽ trả về dưới dạng session_flash cũng như dữ liệu cũ mà người dùng đã nhập vào
+- Ta tạo hàm `old` trong file helpers để lấy dữ liệu cũ từ session flash. hàm `flash` sẽ lấy dữ liệu từ session flash và xóa nó sau khi đã lấy ra. Hàm `set_old` sẽ lưu dữ liệu cũ vào session flash để có thể sử dụng lại sau này.

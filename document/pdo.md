@@ -37,7 +37,7 @@ return $stmt->fetchAll(PDO::FETCH_ASSOC);
 - `stmt` là viết tắt của từ "statement", đại diện cho một câu lệnh SQL đã được chuẩn bị.
 
 ✅ 1. $pdo->query($sql)
-Hàm query() là một phương thức của đối tượng PDO trong PHP.
+Hàm `query()` là một phương thức của đối tượng PDO trong PHP.
 
 📌 Mục đích:
 Thực thi một câu SQL đơn giản (thường là SELECT, không có tham số ràng buộc).
@@ -71,3 +71,21 @@ Giá trị:
   ['id' => 2, 'name' => 'Bob']
 ]
 ```
+
+### Truy vấn INSERT
+```php
+$stmt = $this->db->prepare("INSERT INTO products (name, price) VALUES (:name, :price)");
+$stmt->bindParam(':name', $data['name']);
+$stmt->bindParam(':price', $data['price']);
+$stmt->execute();
+```
+- `prepare()` tạo một prepared statement — nghĩa là câu lệnh SQL được “biên dịch trước” nhưng chưa chạy, giúp:
+  - Tránh SQL Injection.
+  - Tăng hiệu suất khi chạy nhiều lần với dữ liệu khác nhau.
+- :name và :price là named placeholders — các biến tạm để bạn bind dữ liệu vào sau.
+- `bindParam()` gắn dữ liệu từ biến PHP vào placeholder SQL.
+- Ở đây:
+    - :name → lấy giá trị từ $data['name'].
+    - :price → lấy giá trị từ $data['price'].
+- bindParam gắn tham chiếu, nghĩa là nếu bạn thay đổi giá trị $data['name'] sau khi bind, thì khi execute() nó sẽ dùng giá trị mới nhất.
+- `execute()` thực thi câu lệnh SQL với các giá trị đã bind vào.
