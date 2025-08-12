@@ -89,3 +89,51 @@ $stmt->execute();
     - :price → lấy giá trị từ $data['price'].
 - bindParam gắn tham chiếu, nghĩa là nếu bạn thay đổi giá trị $data['name'] sau khi bind, thì khi execute() nó sẽ dùng giá trị mới nhất.
 - `execute()` thực thi câu lệnh SQL với các giá trị đã bind vào.
+
+So sánh bindParam và bindValue:
+
+1. Giống nhau
+- Cả hai đều dùng để gắn dữ liệu vào placeholder (:name, :price, v.v.).
+- Giúp bảo vệ chống SQL Injection và giữ code gọn gàng.
+- Đều có cú pháp gần giống nhau.
+2. Khác nhau chính
+
+| Đặc điểm                           | `bindParam()`                                              | `bindValue()`                                |
+| ---------------------------------- | ---------------------------------------------------------- | -------------------------------------------- |
+| **Kiểu gắn dữ liệu**               | Gắn **theo tham chiếu** (reference).                       | Gắn **theo giá trị** (value).                |
+| **Thời điểm lấy dữ liệu**          | Lấy giá trị **khi `execute()` chạy**, không phải lúc bind. | Lấy giá trị **ngay khi bind**.               |
+| **Khi thay đổi biến sau khi bind** | Giá trị mới sẽ được dùng khi `execute()`.                  | Giá trị vẫn giữ nguyên như lúc bind ban đầu. |
+| **Dùng khi nào**                   | Khi muốn bind biến có thể thay đổi trước khi execute.      | Khi giá trị là hằng số hoặc không đổi.       |
+
+
+3. Ví dụ dễ hiểu
+
+Dùng bindParam() (theo tham chiếu)
+```php
+$name = "Product A";
+$stmt = $db->prepare("INSERT INTO products (name) VALUES (:name)");
+$stmt->bindParam(':name', $name);
+
+$name = "Product B"; // đổi giá trị sau khi bind
+$stmt->execute(); // => Lưu "Product B" vào DB
+```
+Dùng bindValue() (theo giá trị)
+```php
+$name = "Product A";
+$stmt = $db->prepare("INSERT INTO products (name) VALUES (:name)");
+$stmt->bindValue(':name', $name);
+
+$name = "Product B"; // đổi giá trị sau khi bind
+$stmt->execute(); // => Vẫn lưu "Product A" vào DB
+```
+4. Kinh nghiệm dùng
+- Nếu bạn chỉ truyền hằng số hoặc biến không thay đổi → dùng bindValue().
+- Nếu muốn bind biến sẽ thay đổi sau khi bind → dùng bindParam().
+- Thực tế: nhiều dev hiện nay hay bỏ qua bindParam/bindValue mà truyền trực tiếp vào execute() như:
+
+```php
+$stmt = $db->prepare("INSERT INTO products (name) VALUES (:name)");
+$stmt->execute([':name' => $name]);
+```
+Cách này gọn và dễ đọc.
+

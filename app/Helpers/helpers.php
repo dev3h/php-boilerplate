@@ -25,12 +25,13 @@ if (!function_exists('route')) {
      * Generate a URL for a named route.
      *
      * @param string $name The name of the route.
+     * @param array $params Optional parameters to replace in the URI.
      * @return string|null The URL if found, null otherwise.
      */
-    function route(string $name): ?string
+    function route(string $name, array $params = []): ?string
     {
         global $router;
-        return $router->route($name);
+        return $router->route($name, $params);
     }
 }
 

@@ -14,6 +14,9 @@
                 <td><?= $product['id'] ?></td>
                 <td><?= $product['name'] ?></td>
                 <td><?= $product['price'] ?></td>
+                <td>
+                    <a href="<?php echo route('product.edit', ['id' => $product['id']]) ?>">Edit</a>
+                </td>
             </tr>
         <?php endforeach; ?>
     </tbody>

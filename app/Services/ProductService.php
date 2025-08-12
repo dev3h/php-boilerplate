@@ -18,6 +18,11 @@ class ProductService
         return $this->productRepository->get_all();
     }
 
+    public function get_one(int $id): array|null
+    {
+        return $this->productRepository->get_one($id);
+    }
+
     public function store(array $data)
     {
         $validation = validator($data, [
@@ -32,5 +37,23 @@ class ProductService
             ];
         }
         return $this->productRepository->store($data);
+    }
+
+    public function update(array $data)
+    {
+        $validation = validator($data, [
+            'id' => 'required|numeric',
+            'name' => 'required|min:3',
+            'price' => 'required|numeric|min:0',
+        ]);
+        if ($validation->fails()) {
+            $errors = $validation->errors();
+            return [
+                'status' => '422',
+                'errors' => $errors,
+            ];
+        }
+        // Assuming there's an update method in ProductRepository
+        return $this->productRepository->update($data);
     }
 }

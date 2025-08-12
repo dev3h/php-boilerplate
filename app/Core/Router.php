@@ -79,7 +79,26 @@ class Router
 		// Normalize the URI by removing query string and ensuring it starts with a slash
 		$uri = rtrim(parse_url($uri, PHP_URL_PATH), '/') ?: '/';
 
-		$route = $this->routes[$method][$uri] ?? null;
+		$route = null;
+		$params = [];
+		
+		// Search for a matching route (supports :param syntax)
+		foreach ($this->routes[$method] ?? [] as $routePath => $details) {
+			// Replace :param with regex group
+			$pattern = preg_replace('#:([\w]+)#', '([^/]+)', $routePath);
+			
+			// Match the pattern against the current URI
+			if (preg_match('#^' . $pattern . '$#', $uri, $matches)) {
+				array_shift($matches); // Remove the full match
+
+				// Extract parameter names from routePath
+				preg_match_all('#:([\w]+)#', $routePath, $paramNames);
+				$params = array_combine($paramNames[1], $matches);
+
+				$route = $details;
+				break;
+			}
+		}
 		
 		if ($route === null) {
 			http_response_code(404);
@@ -117,21 +136,30 @@ class Router
 
 		// Dynamically call the method ($methodName) on the controller instance.
 		// This allows routing to work even when the method name is determined at runtime.
-		call_user_func([$controllerInstance, $methodName]);
+		call_user_func([$controllerInstance, $methodName], $params);
 	}
 
 	/**
 	 * Get the URI for a named route.
 	 *
 	 * @param string $name The name of the route.
+	 * @param array $params Optional parameters to replace in the URI.
+	 *                      This allows for dynamic segments in the URI (e.g., /product/:id)
 	 * @return string|null The URI if found, null otherwise.
 	 */
-	public function route(string $name): ?string
+	public function route(string $name, array $params = []): ?string
 	{
 		foreach ($this->routes as $methodRoutes) {
 			foreach ($methodRoutes as $uri => $details) {
 				if (($details['name'] ?? null) === $name) {
-					return $uri;
+					$finalUri = $uri;
+
+					// Replace dynamic segments in the URI with provided parameters
+					foreach ($params as $key => $value) {
+						$finalUri = str_replace(':' . $key, urlencode((string) $value), $finalUri);
+					}
+
+					return $finalUri;
 				}
 			}
 		}
