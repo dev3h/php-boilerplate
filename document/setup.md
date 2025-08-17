@@ -17,6 +17,9 @@ php-boilerplate/
 │   └── app.php          # Nơi khởi tạo các thành phần cần thiết (env, autoload)
 ├── routes/                 # Định nghĩa các route
 │   └── web.php
+├── Database/               # Chứa các migration và seed
+│   └── migrations/
+└── migrate.php             # File thực hiện migrate
 ├── config/                 # Cấu hình DB, app
 ├── vendor/                 # Composer packages
 └── composer.json
@@ -75,3 +78,6 @@ composer require vlucas/phpdotenv
 - Tạo thêm 1 hàm `validate` trong file helpers để sử dụng dễ dàng hơn.
 - Trong quá trình trả về lỗi trong controller, ta cần handle validate lỗi sẽ trả về dưới dạng session_flash cũng như dữ liệu cũ mà người dùng đã nhập vào
 - Ta tạo hàm `old` trong file helpers để lấy dữ liệu cũ từ session flash. hàm `flash` sẽ lấy dữ liệu từ session flash và xóa nó sau khi đã lấy ra. Hàm `set_old` sẽ lưu dữ liệu cũ vào session flash để có thể sử dụng lại sau này.
+
+# 11 Tạo script migrate
+- Tạo file `migrate.php` trong thư mục gốc để thực hiện migrate
