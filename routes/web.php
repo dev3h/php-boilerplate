@@ -6,3 +6,4 @@ $router->get('/product/create', 'ProductController@create')->name('product.creat
 $router->post('/product/create', 'ProductController@store')->name('product.store');
 $router->get('/product/edit/:id', 'ProductController@edit')->name('product.edit');
 $router->post('/product/update', 'ProductController@update')->name('product.update');
+$router->get('/product/delete/:id', 'ProductController@delete')->name('product.delete');

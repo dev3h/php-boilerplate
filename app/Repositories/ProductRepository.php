@@ -70,4 +70,14 @@ class ProductRepository
             return ['status' => '500', 'message' => 'Internal Server Error'];
         }
     }
+
+    public function delete(int $id): void
+    {
+        try {
+            $stmt = $this->db->prepare("DELETE FROM products WHERE id = :id");
+            $stmt->execute([':id' => $id]);
+        } catch (PDOException $e) {
+            echo "Error deleting product: " . $e->getMessage();
+        }
+    }
 }

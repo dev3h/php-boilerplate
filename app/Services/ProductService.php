@@ -56,4 +56,9 @@ class ProductService
         // Assuming there's an update method in ProductRepository
         return $this->productRepository->update($data);
     }
+
+    public function delete(int $id): void
+    {
+        $this->productRepository->delete($id);
+    }
 }

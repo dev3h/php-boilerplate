@@ -66,4 +66,12 @@ class ProductController
             exit;
         }
     }
+
+    public function delete($params)
+    {
+        $id = $params['id'] ?? null;
+        $this->productService->delete($id);
+        header('Location: /product');
+        exit;
+    }
 }
